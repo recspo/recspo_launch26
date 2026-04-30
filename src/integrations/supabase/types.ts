@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      launch_event: {
+        Row: {
+          created_at: string
+          id: number
+          launched: boolean
+          launched_at: string | null
+          target: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          launched?: boolean
+          launched_at?: string | null
+          target?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          launched?: boolean
+          launched_at?: string | null
+          target?: number
+        }
+        Relationships: []
+      }
+      participants: {
+        Row: {
+          client_id: string
+          id: string
+          joined_at: string
+          launched: boolean
+          launched_at: string | null
+        }
+        Insert: {
+          client_id: string
+          id?: string
+          joined_at?: string
+          launched?: boolean
+          launched_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          id?: string
+          joined_at?: string
+          launched?: boolean
+          launched_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
