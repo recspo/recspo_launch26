@@ -18,7 +18,10 @@ const Screen = () => {
   const isLaunched = event?.launched || (target > 0 && launchedCount >= target);
 
   useEffect(() => {
-    if (isLaunched) {
+    // If we have an admin flag in the URL, don't redirect so we can reset
+    const isAdmin = new URLSearchParams(window.location.search).has("admin");
+    
+    if (isLaunched && !isAdmin) {
       const t = setTimeout(() => {
         window.location.href = "https://recspo.vercel.app";
       }, 500);
