@@ -11,15 +11,17 @@ const Screen = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    setJoinUrl(`${window.location.origin}/`);
+    setJoinUrl("https://recspo-launch26.vercel.app/");
   }, []);
 
   useEffect(() => {
     if (event?.launched) {
-      const t = setTimeout(() => navigate("/site"), 3000);
+      const t = setTimeout(() => {
+        window.location.href = "https://recspo.vercel.app";
+      }, 3000);
       return () => clearTimeout(t);
     }
-  }, [event?.launched, navigate]);
+  }, [event?.launched]);
 
   const target = event?.target ?? 10;
   const [localTarget, setLocalTarget] = useState(target);

@@ -94,13 +94,17 @@ export async function updateTarget(newTarget: number) {
 }
 
 export async function resetEvent() {
-  await supabase
+  const { error: eventError } = await supabase
     .from("launch_event")
     .update({ launched: false, launched_at: null })
     .eq("id", 1);
+    
+  if (eventError) console.error("Reset launch_event error:", eventError);
 
-  await supabase
+  const { error: partsError } = await supabase
     .from("participants")
     .delete()
-    .not("client_id", "is", null);
+    .neq("client_id", "dummy_value");
+    
+  if (partsError) console.error("Reset participants error:", partsError);
 }

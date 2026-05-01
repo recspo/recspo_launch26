@@ -27,10 +27,12 @@ const Join = () => {
 
   useEffect(() => {
     if (event?.launched) {
-      const t = setTimeout(() => navigate("/site"), 2000);
+      const t = setTimeout(() => {
+        window.location.href = "https://recspo.vercel.app";
+      }, 2000);
       return () => clearTimeout(t);
     }
-  }, [event?.launched, navigate]);
+  }, [event?.launched]);
 
   const target = event?.target ?? 10;
   const pct = Math.min(100, (launchedCount / target) * 100);
