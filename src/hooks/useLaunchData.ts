@@ -103,7 +103,7 @@ export async function resetEvent() {
 
   const { error: partsError } = await supabase
     .from("participants")
-    .delete()
+    .update({ launched: false })
     .neq("client_id", "dummy_value");
     
   if (partsError) console.error("Reset participants error:", partsError);

@@ -69,7 +69,7 @@ const Screen = () => {
           <div className="h-3 w-3 rounded-full bg-destructive animate-pulse" />
           <span className="text-sm uppercase tracking-[0.4em] text-foreground/80">Live · On Air</span>
         </div>
-        <div className="font-display text-2xl text-gradient-gold">COLLEGE SPORTS</div>
+        <img src="/rec_logo.png" alt="Rajalakshmi Engineering College" className="h-10 md:h-12 object-contain" />
         <div className="flex items-center gap-2 text-sm uppercase tracking-widest text-muted-foreground">
           <Users className="w-4 h-4" /> {joinedCount} joined
         </div>
@@ -78,10 +78,12 @@ const Screen = () => {
       {/* Center stage */}
       <section className="flex-1 flex flex-col items-center justify-center px-6 gap-10">
         <div className="text-center space-y-3 animate-fade-in">
-          <p className="text-sm md:text-base uppercase tracking-[0.6em] text-primary/90">Reveal Event</p>
-          <h1 className="font-display text-5xl md:text-7xl text-foreground">
-            The Site Launches At <span className="text-gradient-gold">{target}/{target}</span>
+          <h1 className="font-display text-5xl md:text-7xl text-foreground uppercase">
+            RECSPO SPORTS DAY 26
           </h1>
+          <p className="text-sm md:text-base uppercase tracking-[0.6em] text-primary/90 mt-4">
+            The Site Launches At <span className="text-gradient-gold">{target}/{target}</span>
+          </p>
         </div>
 
         <CountdownDisplay current={launchedCount} target={target} />

@@ -56,9 +56,10 @@ const Join = () => {
     <main className="min-h-screen flex flex-col items-center justify-between p-6 grid-bg relative overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent animate-scan" />
 
-      <header className="w-full pt-6 text-center animate-fade-in">
-        <p className="text-xs uppercase tracking-[0.5em] text-primary/80">College Sports</p>
-        <h1 className="font-display text-4xl mt-2 text-gradient-gold">THE LAUNCH</h1>
+      <header className="w-full pt-6 text-center animate-fade-in flex flex-col items-center">
+        <img src="/rec_logo.png" alt="Rajalakshmi Engineering College" className="h-8 object-contain mb-3" />
+        <p className="text-xs uppercase tracking-[0.5em] text-primary/80">The Launch</p>
+        <h1 className="font-display text-3xl md:text-4xl mt-2 text-gradient-gold">RECSPO SPORTS DAY 26</h1>
       </header>
 
       <section className="flex flex-col items-center gap-8 w-full animate-scale-in">
