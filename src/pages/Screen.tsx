@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
-import { useLaunchData } from "@/hooks/useLaunchData";
+import { useLaunchData, updateTarget, resetEvent } from "@/hooks/useLaunchData";
 import { CountdownDisplay } from "@/components/CountdownDisplay";
-import { Trophy, Users, Zap } from "lucide-react";
+import { Trophy, Users, Zap, RotateCcw } from "lucide-react";
 
 const Screen = () => {
   const { event, launchedCount, joinedCount } = useLaunchData();
@@ -22,6 +22,11 @@ const Screen = () => {
   }, [event?.launched, navigate]);
 
   const target = event?.target ?? 10;
+  const [localTarget, setLocalTarget] = useState(target);
+
+  useEffect(() => {
+    setLocalTarget(target);
+  }, [target]);
 
   if (event?.launched) {
     return (
@@ -96,6 +101,28 @@ const Screen = () => {
         <span>// Powered by the crowd</span>
         <span className="animate-flicker">{joinUrl.replace(/^https?:\/\//, "")}</span>
       </footer>
+
+      <div className="absolute bottom-4 right-4 flex items-center gap-3 z-50">
+        <div className="flex items-center gap-2 bg-background/50 rounded-full px-4 py-2 border border-border/50 backdrop-blur-sm">
+          <span className="text-xs text-muted-foreground uppercase tracking-widest">Target</span>
+          <input 
+            type="number" 
+            value={localTarget}
+            onChange={(e) => setLocalTarget(Number(e.target.value))}
+            onBlur={() => updateTarget(localTarget)}
+            onKeyDown={(e) => e.key === 'Enter' && updateTarget(localTarget)}
+            className="w-16 bg-transparent text-foreground font-display text-lg focus:outline-none text-center"
+            title="Press Enter or click away to save"
+          />
+        </div>
+        <button
+          onClick={resetEvent}
+          className="p-3 rounded-full bg-background/50 text-muted-foreground hover:text-foreground hover:bg-background/80 transition-colors border border-border/50 backdrop-blur-sm"
+          title="Reset Launch"
+        >
+          <RotateCcw className="w-5 h-5" />
+        </button>
+      </div>
     </main>
   );
 };

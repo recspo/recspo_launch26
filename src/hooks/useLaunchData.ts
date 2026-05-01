@@ -85,3 +85,22 @@ export async function pressLaunch() {
 export function getMyClientId() {
   return getClientId();
 }
+
+export async function updateTarget(newTarget: number) {
+  await supabase
+    .from("launch_event")
+    .update({ target: newTarget })
+    .eq("id", 1);
+}
+
+export async function resetEvent() {
+  await supabase
+    .from("launch_event")
+    .update({ launched: false, launched_at: null })
+    .eq("id", 1);
+
+  await supabase
+    .from("participants")
+    .delete()
+    .not("client_id", "is", null);
+}
