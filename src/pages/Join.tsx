@@ -25,19 +25,21 @@ const Join = () => {
     })();
   }, []);
 
+  const target = event?.target ?? 10;
+  const isLaunched = event?.launched || (target > 0 && launchedCount >= target);
+
   useEffect(() => {
-    if (event?.launched) {
+    if (isLaunched) {
       const t = setTimeout(() => {
         window.location.href = "https://recspo.vercel.app";
-      }, 2000);
+      }, 500);
       return () => clearTimeout(t);
     }
-  }, [event?.launched]);
+  }, [isLaunched]);
 
-  const target = event?.target ?? 10;
   const pct = Math.min(100, (launchedCount / target) * 100);
 
-  if (event?.launched) {
+  if (isLaunched) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center p-6 text-center grid-bg">
         <Trophy className="w-24 h-24 text-primary animate-float mb-6" />

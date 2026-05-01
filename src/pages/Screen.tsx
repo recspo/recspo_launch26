@@ -14,23 +14,24 @@ const Screen = () => {
     setJoinUrl("https://recspo-launch26.vercel.app/");
   }, []);
 
+  const target = event?.target ?? 10;
+  const isLaunched = event?.launched || (target > 0 && launchedCount >= target);
+
   useEffect(() => {
-    if (event?.launched) {
+    if (isLaunched) {
       const t = setTimeout(() => {
         window.location.href = "https://recspo.vercel.app";
-      }, 3000);
+      }, 500);
       return () => clearTimeout(t);
     }
-  }, [event?.launched]);
-
-  const target = event?.target ?? 10;
+  }, [isLaunched]);
   const [localTarget, setLocalTarget] = useState(target);
 
   useEffect(() => {
     setLocalTarget(target);
   }, [target]);
 
-  if (event?.launched) {
+  if (isLaunched) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center grid-bg overflow-hidden relative">
         <div className="absolute inset-0 bg-gradient-gold opacity-20 animate-flicker" />
