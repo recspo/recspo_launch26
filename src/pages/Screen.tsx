@@ -16,18 +16,16 @@ const Screen = () => {
 
   const target = event?.target ?? 10;
   const isLaunched = event?.launched || (target > 0 && launchedCount >= target);
+  const isAdmin = new URLSearchParams(window.location.search).has("admin");
 
   useEffect(() => {
-    // If we have an admin flag in the URL, don't redirect so we can reset
-    const isAdmin = new URLSearchParams(window.location.search).has("admin");
-    
     if (isLaunched && !isAdmin) {
       const t = setTimeout(() => {
         window.location.href = "https://recspo.vercel.app";
       }, 500);
       return () => clearTimeout(t);
     }
-  }, [isLaunched]);
+  }, [isLaunched, isAdmin]);
   const [localTarget, setLocalTarget] = useState(target);
 
   useEffect(() => {
@@ -45,6 +43,18 @@ const Screen = () => {
         <p className="mt-6 text-2xl uppercase tracking-[0.4em] text-foreground/80 animate-fade-in relative z-10">
           Revealing the experience…
         </p>
+
+        {isAdmin && (
+          <div className="absolute bottom-4 right-4 flex items-center gap-3 z-50">
+            <button
+              onClick={resetEvent}
+              className="p-3 rounded-full bg-background/50 text-muted-foreground hover:text-foreground hover:bg-background/80 transition-colors border border-border/50 backdrop-blur-sm"
+              title="Reset Launch"
+            >
+              <RotateCcw className="w-5 h-5" />
+            </button>
+          </div>
+        )}
       </main>
     );
   }
