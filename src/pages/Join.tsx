@@ -90,24 +90,56 @@ const Join = () => {
 
   const target = event?.target ?? 10;
   const isLaunched = event?.launched || (target > 0 && launchedCount >= target);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [playVideo, setPlayVideo] = useState(false);
 
   useEffect(() => {
     if (isLaunched) {
-      const t = setTimeout(() => {
-        window.location.href = "https://recspo.vercel.app";
-      }, 500);
-      return () => clearTimeout(t);
+      setCountdown(3);
+    } else {
+      setCountdown(null);
+      setPlayVideo(false);
     }
   }, [isLaunched]);
 
+  useEffect(() => {
+    if (countdown === null) return;
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (countdown === 0) {
+      setPlayVideo(true);
+    }
+  }, [countdown]);
+
   const pct = Math.min(100, (launchedCount / target) * 100);
+
+  if (playVideo) {
+    return (
+      <main className="min-h-screen bg-black flex items-center justify-center overflow-hidden">
+        <video
+          src="https://res.cloudinary.com/down1eunj/video/upload/v1777904878/bhvonqojjwffpfkvmnmm.mp4"
+          autoPlay
+          playsInline
+          className="w-full h-full object-cover"
+          onEnded={() => {
+            window.location.href = "https://recspo.vercel.app";
+          }}
+        />
+      </main>
+    );
+  }
 
   if (isLaunched) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center p-6 text-center grid-bg">
         <Trophy className="w-24 h-24 text-primary animate-float mb-6" />
-        <h1 className="font-display text-6xl text-gradient-gold mb-3">LAUNCHED!</h1>
-        <p className="text-muted-foreground uppercase tracking-widest">Loading the experience…</p>
+        <h1 className="font-display text-8xl text-gradient-gold mb-3 animate-pulse-gold" key={countdown}>
+          {countdown !== null && countdown > 0 ? countdown : "GO!"}
+        </h1>
+        <p className="text-muted-foreground uppercase tracking-widest mt-4">
+          {countdown !== null && countdown > 0 ? "Launching in..." : "Loading the experience…"}
+        </p>
         <div className="mt-8 w-full max-w-xs h-1 bg-secondary rounded-full overflow-hidden">
           <div className="h-full bg-gradient-gold animate-shimmer" />
         </div>
@@ -118,6 +150,13 @@ const Join = () => {
   return (
     <main className="min-h-screen flex flex-col items-center justify-between p-6 grid-bg relative overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent animate-scan" />
+
+      {/* Hidden video for prefetching */}
+      <video 
+        preload="auto" 
+        src="https://res.cloudinary.com/down1eunj/video/upload/v1777904878/bhvonqojjwffpfkvmnmm.mp4" 
+        style={{ display: 'none' }} 
+      />
 
       <header className="w-full pt-6 text-center animate-fade-in flex flex-col items-center">
         <img src="/rec_logo.png" alt="Rajalakshmi Engineering College" className="h-8 object-contain mb-3" />

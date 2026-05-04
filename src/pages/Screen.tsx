@@ -17,31 +17,74 @@ const Screen = () => {
   const target = event?.target ?? 10;
   const isLaunched = event?.launched || (target > 0 && launchedCount >= target);
   const isAdmin = new URLSearchParams(window.location.search).has("admin");
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [playVideo, setPlayVideo] = useState(false);
 
   useEffect(() => {
-    if (isLaunched && !isAdmin) {
-      const t = setTimeout(() => {
-        window.location.href = "https://recspo.vercel.app";
-      }, 500);
-      return () => clearTimeout(t);
+    if (isLaunched) {
+      setCountdown(3);
+    } else {
+      setCountdown(null);
+      setPlayVideo(false);
     }
-  }, [isLaunched, isAdmin]);
+  }, [isLaunched]);
+
+  useEffect(() => {
+    if (countdown === null) return;
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (countdown === 0) {
+      setPlayVideo(true);
+    }
+  }, [countdown]);
+
   const [localTarget, setLocalTarget] = useState(target);
 
   useEffect(() => {
     setLocalTarget(target);
   }, [target]);
 
+  if (playVideo) {
+    return (
+      <main className="min-h-screen bg-black flex items-center justify-center overflow-hidden relative">
+        <video
+          src="https://res.cloudinary.com/down1eunj/video/upload/v1777906087/agcglki6cnwizw6gzxwk.mp4"
+          autoPlay
+          playsInline
+          className="w-full h-full object-cover"
+          onEnded={() => {
+            if (!isAdmin) window.location.href = "https://recspo.vercel.app";
+          }}
+        />
+        {isAdmin && (
+          <div className="absolute bottom-4 right-4 flex items-center gap-3 z-50">
+            <button
+              onClick={() => {
+                setPlayVideo(false);
+                resetEvent();
+              }}
+              className="p-3 rounded-full bg-background/50 text-white hover:text-white/80 transition-colors border border-white/50 backdrop-blur-sm"
+              title="Reset Launch"
+            >
+              <RotateCcw className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+      </main>
+    );
+  }
+
   if (isLaunched) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center grid-bg overflow-hidden relative">
         <div className="absolute inset-0 bg-gradient-gold opacity-20 animate-flicker" />
         <Trophy className="w-48 h-48 text-primary animate-float mb-8 relative z-10" />
-        <h1 className="font-display text-[10rem] leading-none text-gradient-gold animate-scale-in relative z-10">
-          LAUNCHED
+        <h1 className="font-display text-[15rem] leading-none text-gradient-gold animate-scale-in relative z-10" key={countdown}>
+          {countdown !== null && countdown > 0 ? countdown : "LAUNCHED"}
         </h1>
-        <p className="mt-6 text-2xl uppercase tracking-[0.4em] text-foreground/80 animate-fade-in relative z-10">
-          Revealing the experience…
+        <p className="mt-6 text-3xl uppercase tracking-[0.4em] text-foreground/80 animate-fade-in relative z-10">
+          {countdown !== null && countdown > 0 ? "Initiating launch sequence..." : "Revealing the experience…"}
         </p>
 
         {isAdmin && (
@@ -62,6 +105,13 @@ const Screen = () => {
   return (
     <main className="min-h-screen flex flex-col grid-bg relative overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent animate-scan" />
+
+      {/* Hidden video for prefetching */}
+      <video 
+        preload="auto" 
+        src="https://res.cloudinary.com/down1eunj/video/upload/v1777904878/bhvonqojjwffpfkvmnmm.mp4" 
+        style={{ display: 'none' }} 
+      />
 
       {/* Header */}
       <header className="flex items-center justify-between px-12 pt-10">
