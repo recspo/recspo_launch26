@@ -3,13 +3,76 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useLaunchData, joinEvent, pressLaunch, getMyClientId } from "@/hooks/useLaunchData";
 import { supabase } from "@/integrations/supabase/client";
-import { Rocket, Zap, Trophy } from "lucide-react";
+import { Rocket, Zap, Trophy, Activity } from "lucide-react";
 
 const Join = () => {
   const { event, launchedCount } = useLaunchData();
   const [hasLaunched, setHasLaunched] = useState(false);
   const [joining, setJoining] = useState(true);
   const navigate = useNavigate();
+
+  const [shakePower, setShakePower] = useState(0);
+  const [motionEnabled, setMotionEnabled] = useState(false);
+  const [needsPermission, setNeedsPermission] = useState(false);
+
+  useEffect(() => {
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof (DeviceMotionEvent as any).requestPermission === 'function') {
+      setNeedsPermission(true);
+    } else {
+      setMotionEnabled(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!motionEnabled || hasLaunched || shakePower >= 100) return;
+
+    let lastX = 0, lastY = 0, lastZ = 0;
+    let lastUpdate = 0;
+    
+    const handleMotion = (e: DeviceMotionEvent) => {
+      const current = e.accelerationIncludingGravity;
+      if (!current || current.x === null) return;
+      
+      const now = Date.now();
+      if (now - lastUpdate < 100) return;
+
+      const x = current.x;
+      const y = current.y;
+      const z = current.z;
+
+      const deltaX = Math.abs(lastX - x);
+      const deltaY = Math.abs(lastY - y);
+      const deltaZ = Math.abs(lastZ - z);
+
+      if (deltaX + deltaY + deltaZ > 15) { 
+        setShakePower(prev => Math.min(100, prev + 10));
+        lastUpdate = now;
+      }
+
+      lastX = x;
+      lastY = y;
+      lastZ = z;
+    };
+
+    window.addEventListener("devicemotion", handleMotion);
+    return () => window.removeEventListener("devicemotion", handleMotion);
+  }, [motionEnabled, hasLaunched, shakePower]);
+
+  const requestMotionPermission = async () => {
+    if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
+      try {
+        const permissionState = await (DeviceMotionEvent as any).requestPermission();
+        if (permissionState === 'granted') {
+          setMotionEnabled(true);
+          setNeedsPermission(false);
+        }
+      } catch (error) {
+        console.error(error);
+        setMotionEnabled(true);
+        setNeedsPermission(false);
+      }
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -84,17 +147,63 @@ const Join = () => {
             <p className="text-muted-foreground text-sm">Waiting for {Math.max(0, target - launchedCount)} more…</p>
           </div>
         ) : (
-          <Button
-            disabled={joining}
-            onClick={async () => {
-              await pressLaunch();
-              setHasLaunched(true);
-            }}
-            className="relative h-44 w-44 rounded-full bg-gradient-gold text-primary-foreground font-display text-3xl tracking-widest shadow-gold hover:scale-105 active:scale-95 transition-transform animate-pulse-gold border-4 border-primary-foreground/10"
-          >
-            <Rocket className="w-8 h-8 absolute top-6" />
-            LAUNCH
-          </Button>
+          <div className="flex flex-col items-center w-full gap-6 mt-4">
+            <div className="w-full max-w-xs">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs uppercase tracking-widest text-primary font-bold flex items-center gap-2">
+                  <Activity className="w-4 h-4 animate-pulse" />
+                  {shakePower < 100 ? "Shake to Power Up!" : "Ready to Launch!"}
+                </span>
+                <span className="text-xs text-muted-foreground font-display">{shakePower}%</span>
+              </div>
+              <div className="w-full h-8 bg-background rounded-full overflow-hidden border-2 border-border relative p-1 shadow-inner">
+                <div 
+                  className={`h-full rounded-full transition-all duration-300 relative overflow-hidden ${
+                    shakePower === 100 ? 'bg-gradient-gold shadow-glow' : 'bg-primary/80'
+                  }`}
+                  style={{ width: `${shakePower}%` }}
+                >
+                  {shakePower < 100 && shakePower > 0 && (
+                    <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <Button
+              disabled={joining}
+              onClick={async () => {
+                if (needsPermission) {
+                  await requestMotionPermission();
+                }
+                if (shakePower < 100) {
+                  setShakePower(p => Math.min(100, p + 15));
+                  return;
+                }
+                await pressLaunch();
+                setHasLaunched(true);
+              }}
+              className={`relative h-44 w-44 rounded-full font-display tracking-widest shadow-gold transition-all duration-500 border-4 ${
+                shakePower >= 100 
+                  ? "bg-gradient-gold text-primary-foreground text-3xl hover:scale-105 active:scale-95 animate-pulse-gold border-primary-foreground/10" 
+                  : "bg-secondary/50 text-foreground text-xl border-border hover:scale-105 active:scale-95 backdrop-blur-sm"
+              }`}
+            >
+              {shakePower >= 100 ? (
+                <>
+                  <Rocket className="w-8 h-8 absolute top-6 text-primary-foreground animate-bounce" />
+                  LAUNCH
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center space-y-3">
+                  <Activity className={`w-10 h-10 ${shakePower > 0 ? 'text-primary animate-pulse' : 'text-muted-foreground'}`} />
+                  <span className="text-sm leading-tight text-center px-4 font-sans tracking-widest">
+                    {needsPermission ? "TAP TO START" : "SHAKE OR TAP"}
+                  </span>
+                </div>
+              )}
+            </Button>
+          </div>
         )}
       </section>
 
