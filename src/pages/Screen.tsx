@@ -19,8 +19,19 @@ const Screen = () => {
   const isAdmin = new URLSearchParams(window.location.search).has("admin");
   const [countdown, setCountdown] = useState<number | null>(null);
   const [playVideo, setPlayVideo] = useState(false);
-  const [autoplayFailed, setAutoplayFailed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const videoUrl = "https://res.cloudinary.com/down1eunj/video/upload/v1777906087/agcglki6cnwizw6gzxwk.mp4";
+
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'video';
+    link.href = videoUrl;
+    document.head.appendChild(link);
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, []);
 
   useEffect(() => {
     if (isLaunched) {
@@ -49,36 +60,21 @@ const Screen = () => {
 
   useEffect(() => {
     if (playVideo && videoRef.current) {
-      const promise = videoRef.current.play();
-      if (promise !== undefined) {
-        promise.catch(error => {
-          console.error("Autoplay blocked:", error);
-          setAutoplayFailed(true);
-        });
-      }
+      videoRef.current.play().catch(error => {
+        console.error("Autoplay error:", error);
+      });
     }
   }, [playVideo]);
 
   if (playVideo) {
     return (
       <main className="min-h-screen bg-black flex items-center justify-center overflow-hidden relative">
-        {autoplayFailed && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-            <button 
-              className="px-10 py-6 bg-gradient-gold text-primary-foreground font-display text-3xl rounded-full shadow-glow animate-pulse-gold hover:scale-105 transition-transform"
-              onClick={() => {
-                setAutoplayFailed(false);
-                videoRef.current?.play();
-              }}
-            >
-              Start Video
-            </button>
-          </div>
-        )}
         <video
           ref={videoRef}
-          src="https://res.cloudinary.com/down1eunj/video/upload/v1777906087/agcglki6cnwizw6gzxwk.mp4"
+          src={videoUrl}
           playsInline
+          autoPlay
+          muted
           className="w-full h-full object-cover"
           onEnded={() => {
             window.location.href = "https://recspo.vercel.app";
@@ -132,13 +128,6 @@ const Screen = () => {
   return (
     <main className="min-h-screen flex flex-col grid-bg relative overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent animate-scan" />
-
-      {/* Hidden video for prefetching */}
-      <video 
-        preload="auto" 
-        src="https://res.cloudinary.com/down1eunj/video/upload/v1777906087/agcglki6cnwizw6gzxwk.mp4" 
-        style={{ display: 'none' }} 
-      />
 
       {/* Header */}
       <header className="flex items-center justify-between px-12 pt-10">
