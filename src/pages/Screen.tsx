@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { useLaunchData, updateTarget, resetEvent } from "@/hooks/useLaunchData";
@@ -19,6 +19,8 @@ const Screen = () => {
   const isAdmin = new URLSearchParams(window.location.search).has("admin");
   const [countdown, setCountdown] = useState<number | null>(null);
   const [playVideo, setPlayVideo] = useState(false);
+  const [autoplayFailed, setAutoplayFailed] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (isLaunched) {
@@ -45,16 +47,41 @@ const Screen = () => {
     setLocalTarget(target);
   }, [target]);
 
+  useEffect(() => {
+    if (playVideo && videoRef.current) {
+      const promise = videoRef.current.play();
+      if (promise !== undefined) {
+        promise.catch(error => {
+          console.error("Autoplay blocked:", error);
+          setAutoplayFailed(true);
+        });
+      }
+    }
+  }, [playVideo]);
+
   if (playVideo) {
     return (
       <main className="min-h-screen bg-black flex items-center justify-center overflow-hidden relative">
+        {autoplayFailed && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+            <button 
+              className="px-10 py-6 bg-gradient-gold text-primary-foreground font-display text-3xl rounded-full shadow-glow animate-pulse-gold hover:scale-105 transition-transform"
+              onClick={() => {
+                setAutoplayFailed(false);
+                videoRef.current?.play();
+              }}
+            >
+              Start Video
+            </button>
+          </div>
+        )}
         <video
+          ref={videoRef}
           src="https://res.cloudinary.com/down1eunj/video/upload/v1777906087/agcglki6cnwizw6gzxwk.mp4"
-          autoPlay
           playsInline
           className="w-full h-full object-cover"
           onEnded={() => {
-            if (!isAdmin) window.location.href = "https://recspo.vercel.app";
+            window.location.href = "https://recspo.vercel.app";
           }}
         />
         {isAdmin && (
@@ -109,7 +136,7 @@ const Screen = () => {
       {/* Hidden video for prefetching */}
       <video 
         preload="auto" 
-        src="https://res.cloudinary.com/down1eunj/video/upload/v1777904878/bhvonqojjwffpfkvmnmm.mp4" 
+        src="https://res.cloudinary.com/down1eunj/video/upload/v1777906087/agcglki6cnwizw6gzxwk.mp4" 
         style={{ display: 'none' }} 
       />
 
